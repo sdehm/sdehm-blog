@@ -1,2 +1,10 @@
+github.com/Mitrichius/hugo-theme-anubis v0.0.0-20220725170731-d4ba47cd2196 h1:TzahMQaJXpezO9D2iQHnifGWPUn+41IWgYNBg/wNtQE=
+github.com/Mitrichius/hugo-theme-anubis v0.0.0-20220725170731-d4ba47cd2196/go.mod h1:FKD3NbdsQzL+cXsC3x99XD/t/Rd5EyhDlNBAxQhULbo=
+github.com/kaisugi/HugoTeX v0.0.0-20221002095132-217cd785dd75 h1:VptE9RpDL/tU92qc/n5TZka4uo5c/HLTxl6yH05xZvc=
+github.com/kaisugi/HugoTeX v0.0.0-20221002095132-217cd785dd75/go.mod h1:twAIv7WWKDM4E8I90GJIQdQTLQv6T8IdwO5mV1VU4wI=
+github.com/nunocoracao/blowfish v1.6.0 h1:t/0oeSzqLmo84y8kqx6zTBedl9nDj5jCZHFz0phuGwY=
+github.com/nunocoracao/blowfish v1.6.0/go.mod h1:a+x71NKypnAynVrKYncF4jMagrvWjOdacVpA9RJh2UA=
+github.com/queensferryme/hugo-theme-texify v0.0.0-20221002100717-f40af04636cd h1:C+JaIw0BgiLc7P9Hi2LSybdCRZ6VLAogrv6TeHkhxqs=
+github.com/queensferryme/hugo-theme-texify v0.0.0-20221002100717-f40af04636cd/go.mod h1:n2KensxBMkG6nwIEjVzStjj+6NoroEb9r0TYMR/FMZo=
 github.com/theNewDynamic/gohugo-theme-ananke v0.0.0-20220907123632-5a8b531a7ce2 h1:ovsK3aHUdOOMCTibGDzH9NiwcTjHGs8jAYflHk4z/Ao=
 github.com/theNewDynamic/gohugo-theme-ananke v0.0.0-20220907123632-5a8b531a7ce2/go.mod h1:yY14BLqqh5G61rO81YcJKMHY1rClY5iIiUK+K2JKSUM=
