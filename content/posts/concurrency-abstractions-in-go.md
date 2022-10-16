@@ -116,10 +116,11 @@ func (t *Task) Wait() {
 To use this `Task` abstraction we can create a new `Task` and call `Start` to start the `Task` in a new `goroutine`.
 We then call `Wait` to wait for the `Task` to complete.
 If `Wait` is not called the `Task` might not complete before the program exits.
+The awaiter channel is used to block the `Wait` call until the provided function has completed.
 
 ```go
 t := New(func() {
-    fmt.Println("Hello, World!")
+  fmt.Println("Hello, World!")
 })
 t.Start()
 t.Wait()
@@ -127,6 +128,112 @@ t.Wait()
 
 This implementation is very simple and does not provide any error handling or cancellation.
 It also only implements functions that take no arguments and return no values.
+
+### Task with Input Arguments
+If we want to use a function with arguments with our `Task` we can use a closure to capture the arguments.
+This example uses a similar function except the `greeting` to print is set in the outside scope and passed in as a closure.
+
+```go
+greeting := "Hello from the closure!"
+t := New(func() {
+  fmt.Println(greeting)
+})
+t.Start()
+t.Wait()
+```
+
+{{< lead >}}
+Note that the usual [caveats](https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables) about closures apply here and loop scope variables should be used with care and set as local variables when necessary.
+{{< /lead >}}
+
+### Task with Output Values
+If we want to return a value from the `Task` we can also use a closure to capture the return value.
+This example sets a variable in the outside scope and modifies it in the `Task` function.
+
+```go
+var greeting string
+t := New(func() {
+  greeting = "Hello from the closure!"
+})
+t.Start()
+t.Wait()
+fmt.Println(greeting)
+```
+
+Using closures like this works but it can be hard to determine what the actual inputs and outputs of the `Task` are.
+We also need to pay more attention to the scoping of our variables than seems necessary here.
+
+### Refactoring with Generic Helpers
+We can add to our `Task` implementation to use some generic helpers to make the code more readable and easier to use.
+Since we have already proven that the closure method works for input and outputs we can take advantage of that and not modify existing code.
+To allow the creation of a task with a single input argument we can create the following helper function.
+
+```go
+// Creates a new task with a single input argument.
+func NewWithInput[T any](f func(T), input T) *Task {
+	fun := func() {
+		f(input)
+	}
+	return New(fun)
+}
+
+// usage
+t := NewWithInput(func(i string) {
+  fmt.Println(i)
+}, "Hello with generics!")
+t.Start()
+t.Wait()
+```
+
+This helper function takes a function that takes a single argument and a value to pass into that function.
+
+To allow a task to return a value we must slightly modify the `Task` struct to store the return value.
+We also create a new constructor function to simplify creation of the new struct and a getter function to get the result after blocking on the execution of the task.
+
+```go
+// Task struct that stores a single result value.
+type TaskWithResult[T any] struct {
+	Task
+	result T
+}
+
+// Creates a new task that stores a single result value.
+func NewWithResult[T any](f func() T) *TaskWithResult[T] {
+	t := &TaskWithResult[T]{
+		Task: *New(nil),
+	}
+	t.f = func() {
+		t.result = f()
+	}
+	return t
+}
+
+// Returns the result value after waiting for the task to finish.
+func (t *TaskWithResult[T]) GetResult() T {
+	t.Wait()
+	return t.result
+}
+```
+
+This new constructor closes over its own container struct in order to store the result value.
+Using these new features are straightforward and shown in the following example.
+`GetResult` is called rather than `Wait` so that we get the result value after the task has finished.
+
+```go
+t := NewWithResult(func() string {
+  return "Hello with generic output!"
+})
+t.Start()
+fmt.Println(t.GetResult())
+```
+
+These approaches can be combined based on the needed input and output tasks of the application.
+Unfortunately we would need to create a new version of this function for every variation.
+If we were building a library we would not want to create a new function for every possible number of arguments.
+Code generation and reflection could help solve this but we won't explore that now.
+
+We are implementing currying via closures here since Go does not officially support it directly.
+Other implementations of currying in Go could be explored as alternatives.
 
 ## Work Queues
 
