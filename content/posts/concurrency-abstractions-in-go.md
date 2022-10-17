@@ -228,14 +228,81 @@ fmt.Println(t.GetResult())
 ```
 
 These approaches can be combined based on the needed input and output tasks of the application.
-Unfortunately we would need to create a new version of this function for every variation.
+Unfortunately we would need to create a new version of these functions and wrapper structs for every variation.
 If we were building a library we would not want to create a new function for every possible number of arguments.
 Code generation and reflection could help solve this but we won't explore that now.
 
-We are implementing currying via closures here since Go does not officially support it directly.
-Other implementations of currying in Go could be explored as alternatives.
-
 ## Work Queues
+
+Channels in Go are basically queues so a work queue concurrency abstraction makes sense and can be more idiomatic than some of these other patterns.
+A work queue is a queue of tasks that are executed by a pool of workers.
+The number of workers should be configurable and typically makes sense to set to the number of CPU cores.
+An example work queue implementation is shown below.
+
+```go
+// workers.go
+type Workers[T any] struct {
+	Work chan func() T
+	Results chan T
+	wg sync.WaitGroup
+}
+
+func New[T any](numWorkers int) *Workers[T] {
+	w := &Workers[T]{
+		Work: make(chan func() T),
+		Results: make(chan T),
+		wg: sync.WaitGroup{},
+	}
+
+	for i := 0; i < numWorkers; i++ {
+		w.wg.Add(1)
+		go func() {
+			for f := range w.Work {
+				w.Results <- f()
+			}
+			w.wg.Done()
+		}()
+	}
+
+	// Close the results channel when the work is done.
+	go func() {
+		w.wg.Wait()
+		close(w.Results)
+	}()
+
+	return w
+}
+```
+
+In this example we create a `Workers` struct that has a `Work` channel for tasks and a `Results` channel for results.
+The struct has a generic type parameter to allow a variety of result types.
+We could allow for input arguments explicitly here but our earlier trick of using closures works here as well since we are using a function as the work item type.
+The struct also stores a wait group to manage synchronization of the workers so that we can close the results channel when all the work is done.
+The constructor for this struct accepts a number of workers to create and starts a go routine for each worker that is listening to work channel to take on work as it comes in.
+As work is performed the result is sent to the results channel.
+The following shows how this can be used.
+
+```go
+w := workers.New[string](2)
+go func() {
+  for i := 0; i < 10; i++ {
+    i := i
+    w.Work <- func() string {
+      return fmt.Sprintf("%d", i)
+    }
+  }
+  close(w.Work)
+}()
+for r := range w.Results {
+  fmt.Println(r)
+}
+```
+
+{{< lead >}}
+Note that the `Workers` struct exposes a basic `Work` channel that is not buffered. 
+Since the channel will block on send we must send our work items in a separate go routine that will close the channel once all work has been added.
+If we knew ahead of time how much work we would have we could create a buffered channel of the appropriate size.
+{{< /lead >}}
 
 ## Events
 
