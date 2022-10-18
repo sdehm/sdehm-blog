@@ -77,12 +77,6 @@ In our example here this is not necessary since we are only sending a single ite
 An additional way to receive data from a channel is to use a `for` loop and the `range` keyword.
 Channels can also be buffered, see this Go by Example [post](https://gobyexample.com/channel-buffering) for more details.
 
-## Built-in Concurrency Abstractions
-
-### WaitGroups
-
-### Mutexes
-
 ## Task Abstraction
 
 Many languages provide a `Task` concurrency abstraction that allows for asynchronous execution code with explicit synchronization or "awaiting".
@@ -307,3 +301,145 @@ If we knew ahead of time how much work we would have we could create a buffered 
 ## Events
 
 ## Actor Model
+
+### Actors
+
+```go
+// actor.go
+type Actor[T any] struct {
+	messages chan T
+	handler  func(T)
+	wg       sync.WaitGroup
+}
+
+// Creates a new actor with the given handler function.
+func New[T any](handler func(T)) *Actor[T] {
+	a := &Actor[T]{
+		messages: make(chan T),
+		handler:  handler,
+	}
+	go func() {
+		for m := range a.messages {
+			a.handler(m)
+			a.wg.Done()
+		}
+	}()
+	return a
+}
+
+// Sends a message to the actor.
+func (a *Actor[T]) Send(m T) {
+	a.wg.Add(1)
+	go func() {
+		a.messages <- m
+	}()
+}
+
+// Waits for all messages to be finished and closes the channel.
+func (a *Actor[T]) Stop() {
+	a.wg.Wait()
+	close(a.messages)
+}
+```
+
+```go
+a := actor.New(func(s string) {
+    fmt.Println(s)
+})
+a.Send("Hello, World!")
+a.Send("Hello again, World!")
+a.Stop()
+```
+
+### Specialized Actors
+
+```go
+// printer.go
+type Printer struct {
+	*Actor[string]
+}
+
+func NewPrinter() *Printer {
+	p := &Printer{}
+	p.Actor = New(func(s string) {
+		fmt.Println(s)
+	})
+	return p
+}
+
+func (p *Printer) Print(s string) {
+	p.Send(s)
+}
+```
+
+```go
+p := actor.NewPrinter()
+p.Print("Hello, World!")
+p.Print("Hello again, World!")
+p.Stop()
+```
+
+### Multiple Actors
+
+```go
+// chatroom.go
+type ChatRoom struct {
+	*Actor[message]
+}
+
+// Creates a new chat room that prints messages that come in.
+func NewChatRoom() *ChatRoom {
+	c := &ChatRoom{}
+	c.Actor = New(func(m message) {
+		fmt.Printf("%s: \t %s\n", m.sender.name, m.text)
+	})
+	return c
+}
+
+type Client struct {
+	*Actor[string]
+	name string
+}
+
+// Creates a new client that sends messages to the given chat room.
+func NewClient(name string, room *ChatRoom) *Client {
+	c := &Client{
+		name: name,
+	}
+	c.Actor = New(func(t string) {
+		m := message{
+			sender: c,
+			text:   t,
+		}
+		room.Send(m)
+	})
+	return c
+}
+
+type message struct {
+	sender *Client
+	text   string
+}
+```
+
+```go
+// create chat room
+chatRoom := actor.NewChatRoom()
+
+// create clients
+alice := actor.NewClient("Alice", chatRoom)
+bob := actor.NewClient("Bob", chatRoom)
+
+// send messages
+alice.Send("Hello, Bob!")
+bob.Send("Hello, Alice!")
+
+// stop actors and wait for them to finish
+alice.Stop()
+bob.Stop()
+chatRoom.Stop()
+```
+
+## Conclusions
+
+https://www.brianstorti.com/the-actor-model/
