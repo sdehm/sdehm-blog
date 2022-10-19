@@ -15,8 +15,8 @@ dateFormat = "2 January 2006"
 [author]
   name = "Shaffer Dehmlow"
   image = "img/profile.webp"
-  headline = "Software engineer at GitHub"
-  bio = "Software engineer at GitHub"
+  headline = "Software engineer at GitHub, opinions are my own."
+  bio = ""
   links = [
   #   { email = "mailto:hello@your_domain.com" },
   #   { link = "https://link-to-some-website.com/" },
