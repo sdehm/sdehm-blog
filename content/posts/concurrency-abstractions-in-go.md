@@ -1,5 +1,5 @@
 ---
-title: "Concurrency Abstractions in Go"
+title: "Concurrency Abstractions in Go: Queues, Tasks, and Actors"
 date: 2022-10-18
 draft: false
 tags: ["go", "concurrency", "actor-model"]
