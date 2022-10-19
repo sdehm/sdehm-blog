@@ -1,13 +1,13 @@
 ---
 title: "Concurrency Abstractions in Go: Queues, Tasks, and Actors"
-date: 2022-10-18
+date: 2022-10-19
 draft: false
 tags: ["go", "concurrency", "actor-model"]
 ---
 
 # Introduction
 
-Concurrency is built in to the Go programming language and is one of the most powerful features of the language.
+Concurrency is built-in to the Go programming language and is one of the most powerful features of the language.
 There are many great resources that explain how concurrency works out of the box in Go.
 This post will cover a basic overview of how concurrency works in Go and then explore some concurrency abstractions that are common in other languages and how they can be implemented in Go.
 This post will also cover some basic usage of generics and managing state with closures.
@@ -28,7 +28,8 @@ Go has two primary features for handling concurrency: `goroutines` and `channels
 
 A `goroutine` is a lightweight, virtual process that is managed by a built-in scheduler.
 `Goroutines` are lighter weight than threads in other languages and are created by calling the `go` keyword followed by a function call.
-For example: 
+For example:
+
 ```go
 func main() {
   go func() {
@@ -36,10 +37,10 @@ func main() {
   }()
 }
 ```
+
 This code snippet will create a new `goroutine` that will print "Hello, World!" to the console in the background.
 It is important to note that `goroutines` on their own do not provide any way to wait for execution to complete or to communicate with other `goroutines`.
-Everything in Go is run as a `goroutine` including `main` which will terminate when the program exits.
-At this point any other `goroutines` that are still running will terminate as well.
+This is where `channels` come in.
 
 ### Channels
 
@@ -144,18 +145,18 @@ for r := range w.Results {
 ```
 
 {{< lead >}}
-Note that the `Workers` struct exposes a basic `Work` channel that is not buffered. 
+Note that the `Workers` struct exposes a basic `Work` channel that is not buffered.
 Since the channel will block on send we must send our work items in a separate go routine that will close the channel once all work has been added.
 If we knew ahead of time how much work we would have we could create a buffered channel of the appropriate size.
 {{< /lead >}}
 
 ## Tasks
 
-Many languages provide a `Task` concurrency abstraction that allows for asynchronous execution code with explicit synchronization or "awaiting".
+Other languages provide a `Task` concurrency abstraction that allows for asynchronous execution code with explicit synchronization or "awaiting".
 Sometimes this behavior is called a `promise` or `future`.
-It can also be implemented with `async` and `await` keywords.
 
 ### Basic Task Implementation
+
 The following is an implementation of a `Task` abstraction in Go based loosely on the .NET `Task`.
 
 ```go
@@ -195,6 +196,7 @@ This implementation is very simple and does not provide any error handling or ca
 It also only implements functions that take no arguments and return no values.
 
 ### Task with Input Arguments
+
 If we want to use a function with arguments with our `Task` we can use a closure to capture the arguments.
 This example uses a similar function except the `greeting` to print is set in the outside scope and passed in as a closure.
 
@@ -212,6 +214,7 @@ Note that the usual [caveats](https://github.com/golang/go/wiki/CommonMistakes#u
 {{< /lead >}}
 
 ### Task with Output Values
+
 If we want to return a value from the `Task` we can also use a closure to capture the return value.
 This example defines a variable in the outside scope and modifies it in the `Task` function.
 
@@ -229,6 +232,7 @@ Using closures like this works but it can be hard to determine what the actual i
 We also need to pay more attention to the scoping of our variables than seems necessary.
 
 ### Refactoring with Generic Helpers
+
 We can update our `Task` implementation to use some generic helpers to make the code more readable and easier to use.
 Since we have already proven that the closure method works for input and outputs we can take advantage of that and not modify existing code.
 To allow the creation of a task with a single input argument we can create the following helper function.
@@ -513,11 +517,11 @@ Despite the fact that in reality most usages of concurrency would be more bespok
 
 Some future exploration could include:
 
-* More complex actor systems and a more thorough implementation of the actor model
-* Event based concurrency patterns
-* Performance benchmarking of the different approaches and comparison with other languages
-* Error handling and fault tolerance
-* Using buffering to improve performance and change behavior of the channels
+- More complex actor systems and a more thorough implementation of the actor model
+- Event based concurrency patterns
+- Performance benchmarking of the different approaches and comparison with other languages
+- Error handling and fault tolerance
+- Using buffering to improve performance and change behavior of the channels
 
 ## Further Reading
 
