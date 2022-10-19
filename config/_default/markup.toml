@@ -7,7 +7,7 @@
 
 [highlight]
   noClasses = false
-  lineNos = true
+  lineNos = false
 
 [tableOfContents]
   startLevel = 2
