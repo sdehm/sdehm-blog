@@ -508,7 +508,16 @@ Supervisor actors that manage other actors and enhance fault tolerance are also 
 
 ## Conclusions
 
+The fundamental building blocks of Go allow for some expressive and powerful concurrency patterns.
+Despite the fact that in reality most usages of concurrency would be more bespoke, the basic tools of Go allow for a lot of flexibility.
 
+Some future exploration could include:
+
+* More complex actor systems and a more thorough implementation of the actor model
+* Event based concurrency patterns
+* Performance benchmarking of the different approaches and comparison with other languages
+* Error handling and fault tolerance
+* Using buffering to improve performance and change behavior of the channels
 
 ## Further Reading
 
