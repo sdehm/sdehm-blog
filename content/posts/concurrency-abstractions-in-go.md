@@ -298,11 +298,34 @@ Since the channel will block on send we must send our work items in a separate g
 If we knew ahead of time how much work we would have we could create a buffered channel of the appropriate size.
 {{< /lead >}}
 
-## Events
-
 ## Actor Model
 
+The actor model is a concurrency abstraction that is based on the idea of actors that communicate with each other via messages.
+An actor can only do three things when receiving a message: mutate internal state, send a message, and create a child actor. [^actor]
+Message sending is asynchronous and non-blocking by default so the order of messages is not guaranteed.
+The actor is the base unit of computation and they compose to form larger systems.
+One of the interesting properties of an actor model based system is that there is no shared state between actors.
+This allows for greater fault tolerance and easier reasoning about the system.
+
+This pattern has been implemented in many languages and is a proven approach to distributed systems.
+Erlang and other BEAM languages such as Elixir are built around this concept.
+BEAM languages use an abstraction on top of the actor model known as OTP (Open Telecom Platform)[^otp] that creates a framework for building distributed systems.
+For a Go implementation of OTP see https://github.com/ergo-services/ergo.
+Our example implementation of the actor model is more basic however.
+
+An extra benefit of the actor model is that it can be easily scaled out to a distributed system where the actors are running on different machines though we won't cover that case here.
+
+[^actor]: See https://www.brianstorti.com/the-actor-model/ for a good introduction to the actor model as well as https://en.wikipedia.org/wiki/Actor_model for more history and detail.
+[^otp]: https://github.com/erlang/otp
+
 ### Actors
+
+In Go, `goroutines` make a great foundation for actors as Erlang processes do for BEAM languages.
+On top of the virtualized lightweight unit of computation we only need to add a message queue to create an actor.
+Some synchronization is also necessary in to improve the usability of the actor.
+
+This example creates a simple `Actor` struct that wraps up a configurable actor implementation with a message queue and a wait group for synchronization.
+The handling of messages is configured at construction via a function that is stored in the struct.
 
 ```go
 // actor.go
@@ -342,6 +365,19 @@ func (a *Actor[T]) Stop() {
 }
 ```
 
+The `Actor` struct has a generic type parameter to allow for a variety of message types.
+It implements a `Send` method that adds the message to the message queue and increments the wait group.
+This is done asynchronously so that the caller does not block though the wait group ensures that when we stop the actor it drains existing messages.
+Asynchronous message sending is expected in an actor model based system.
+The `Stop` method waits for all messages to be processed and then closes the message queue.
+
+{{< lead >}}
+Note that the `messages` channel is not buffered and we are able to accept multiple messages because we are using a goroutine to send and process each message.
+{{< /lead >}}
+
+See the following snippet for usage of this struct.
+In this example we create a simple actor that prints out the message it receives.
+
 ```go
 a := actor.New(func(s string) {
     fmt.Println(s)
@@ -351,7 +387,12 @@ a.Send("Hello again, World!")
 a.Stop()
 ```
 
+The messages will not always be printed in the order they were sent because actors are asynchronous and non-deterministic by default.
+
 ### Specialized Actors
+
+The `Actor` struct we built above is a generic implementation that can be expanded upon to create more specialized actors.
+In this example we create a specialized actor that only prints every message (of type string) it receives.
 
 ```go
 // printer.go
@@ -372,6 +413,9 @@ func (p *Printer) Print(s string) {
 }
 ```
 
+All we are doing to the generic `Actor` is creating a custom constructor and wrapping the `Send` method with a more specific name.
+The following snippet shows how this would be used to perform the same task as the generic `Actor` example above.
+
 ```go
 p := actor.NewPrinter()
 p.Print("Hello, World!")
@@ -379,7 +423,15 @@ p.Print("Hello again, World!")
 p.Stop()
 ```
 
+The output is the same but we get a little bit more reusability and better readability with our specialized actors.
+
 ### Multiple Actors
+
+Actors are rarely useful on their own.
+Instead, they typically are composed into larger systems that accomplish more complex tasks.
+In this example we create two types of actors: a `ChatRoom` and a `Client`.
+The `ChatRoom` is responsible for printing any message it receives along with the sender's name.
+The `Client` is responsible for sending messages to the `ChatRoom`.
 
 ```go
 // chatroom.go
@@ -422,6 +474,9 @@ type message struct {
 }
 ```
 
+All we need to do to implement this is create custom types and constructors for each actor type that sets their message handling behavior as well as create a small custom struct to serve as the message type.
+This snippet shows these actors in action.
+
 ```go
 // create chat room
 chatRoom := actor.NewChatRoom()
@@ -440,6 +495,14 @@ bob.Stop()
 chatRoom.Stop()
 ```
 
+The chatroom actor is constructed, then two clients are created and given the chatroom as inputs so that their handlers know which actor to send messages to.
+The clients then send messages to each other and the chatroom prints them out.
+Finally, all actors are stopped and the program exits.
+
+{{< lead >}}
+Note that the actors must be stopped in this example so that we make sure to wait for all messages to be processed since they are passing asynchronously.
+{{< /lead >}}
+
 ## Conclusions
 
-https://www.brianstorti.com/the-actor-model/
+## Further Reading
