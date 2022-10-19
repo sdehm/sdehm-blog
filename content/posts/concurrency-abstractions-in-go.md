@@ -1,18 +1,20 @@
 ---
 title: "Concurrency Abstractions in Go"
-date: 2022-10-09T14:51:19-06:00
+date: 2022-10-18
 draft: true
-tags: ["go", "concurrency"]
+tags: ["go", "concurrency", "actor-model"]
 ---
 
 # Introduction
 
 Concurrency is built in to the Go programming language and is one of the most powerful features of the language.
-There are many great resources to learn more about how concurrency works out of the box in Go.
-This post will instead explore some alternative abstractions borrowed from other languages as implemented in Go.
+There are many great resources that explain how concurrency works out of the box in Go.
+This post will cover a basic overview of how concurrency works in Go and then explore some concurrency abstractions that are common in other languages and how they can be implemented in Go.
+This post will also cover some basic usage of generics and managing state with closures.
 
-Note that one of the other powerful features of Go is that it does not rely on as many abstractions as other languages and is typically used to directly address particular problems.
+Note that one of the characteristics of Go is that it does not rely on as many abstractions as other languages and more direct approaches are common.
 The patterns presented here are more for learning and exploring with comparisons to other languages rather than for actual use.
+Error handling is not directly addressed in any of these examples as well.
 
 {{< lead >}}
 Code for this post can be found at [github.com/sdehm/go-concurrency-abstractions](https://github.com/sdehm/go-concurrency-abstractions).
@@ -20,13 +22,11 @@ Code for this post can be found at [github.com/sdehm/go-concurrency-abstractions
 
 ## Go Concurrency Fundamentals
 
-This section will describe some of the fundamentals and primitives for concurrency in Go.
-Only basic descriptions will be covered here so please check other resources for more detailed explanations.
-Mutexes and atomic types are also not covered.
+Go has two primary features for handling concurrency: `goroutines` and `channels`.
 
 ### Goroutines
 
-A `goroutine` is a lightweight, virtual process that is managed by the Go runtime.
+A `goroutine` is a lightweight, virtual process that is managed by a built-in scheduler.
 `Goroutines` are lighter weight than threads in other languages and are created by calling the `go` keyword followed by a function call.
 For example: 
 ```go
@@ -38,14 +38,14 @@ func main() {
 ```
 This code snippet will create a new `goroutine` that will print "Hello, World!" to the console in the background.
 It is important to note that `goroutines` on their own do not provide any way to wait for execution to complete or to communicate with other `goroutines`.
-Everything in Go is run as a `goroutine` including `main` which will actually close when the program exits.
-Any other `goroutines` that are still running will be terminated as well.
+Everything in Go is run as a `goroutine` including `main` which will terminate when the program exits.
+At this point any other `goroutines` that are still running will terminate as well.
 
 ### Channels
 
 A channel in Go is a special data structure that behaves like a queue that can be accessed by multiple `goroutines`.
 Items can be either sent into the channel or received from the channel.
-Channels provide a mechanism for `goroutines` to communicate with each other.
+Channels provide the ability for `goroutines` to communicate with each other.
 This allows data to be passed in and out of `goroutines` and for `goroutines` to wait for data to be available.
 They also allow for synchronization of `goroutines` to ensure that they are executed in a particular order.
 If the example above was run in an empty program it would not print anything since the main `goroutine` would exit before the `goroutine` that prints "Hello, World!" could finish.
@@ -64,7 +64,7 @@ func helloworld() {
 ```
 
 {{< lead >}}
-The `struct{}` type is used here since it is the smallest type in Go and does not take up any memory. Another popular option is a `bool` type.
+The `struct{}` type is used here due to its minimal size. Another popular option for a signal channel like this is a `bool`.
 {{< /lead >}}
 
 In this example the data in the channel does not matter.
@@ -77,158 +77,9 @@ In our example here this is not necessary since we are only sending a single ite
 An additional way to receive data from a channel is to use a `for` loop and the `range` keyword.
 Channels can also be buffered, see this Go by Example [post](https://gobyexample.com/channel-buffering) for more details.
 
-## Task Abstraction
-
-Many languages provide a `Task` concurrency abstraction that allows for asynchronous execution code with explicit synchronization or "awaiting".
-Sometimes this behavior is called a `promise` or `future`.
-It can also be implemented with `async` and `await` keywords.
-
-### Basic Task Implementation
-The following is an implementation of a `Task` abstraction in Go based loosely on .NET `Task`s.
-
-```go
-// task.go
-func New(f func()) *Task {
-	return &Task{
-		f:       f,
-		awaiter: make(chan struct{}),
-	}
-}
-
-func (t *Task) Start() {
-	go func() {
-		t.f()
-		t.awaiter <- struct{}{}
-	}()
-}
-
-func (t *Task) Wait() {
-	<-t.awaiter
-}
-```
-
-To use this `Task` abstraction we can create a new `Task` and call `Start` to start the `Task` in a new `goroutine`.
-We then call `Wait` to wait for the `Task` to complete.
-If `Wait` is not called the `Task` might not complete before the program exits.
-The awaiter channel is used to block the `Wait` call until the provided function has completed.
-
-```go
-t := New(func() {
-  fmt.Println("Hello, World!")
-})
-t.Start()
-t.Wait()
-```
-
-This implementation is very simple and does not provide any error handling or cancellation.
-It also only implements functions that take no arguments and return no values.
-
-### Task with Input Arguments
-If we want to use a function with arguments with our `Task` we can use a closure to capture the arguments.
-This example uses a similar function except the `greeting` to print is set in the outside scope and passed in as a closure.
-
-```go
-greeting := "Hello from the closure!"
-t := New(func() {
-  fmt.Println(greeting)
-})
-t.Start()
-t.Wait()
-```
-
-{{< lead >}}
-Note that the usual [caveats](https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables) about closures apply here and loop scope variables should be used with care and set as local variables when necessary.
-{{< /lead >}}
-
-### Task with Output Values
-If we want to return a value from the `Task` we can also use a closure to capture the return value.
-This example sets a variable in the outside scope and modifies it in the `Task` function.
-
-```go
-var greeting string
-t := New(func() {
-  greeting = "Hello from the closure!"
-})
-t.Start()
-t.Wait()
-fmt.Println(greeting)
-```
-
-Using closures like this works but it can be hard to determine what the actual inputs and outputs of the `Task` are.
-We also need to pay more attention to the scoping of our variables than seems necessary here.
-
-### Refactoring with Generic Helpers
-We can add to our `Task` implementation to use some generic helpers to make the code more readable and easier to use.
-Since we have already proven that the closure method works for input and outputs we can take advantage of that and not modify existing code.
-To allow the creation of a task with a single input argument we can create the following helper function.
-
-```go
-// Creates a new task with a single input argument.
-func NewWithInput[T any](f func(T), input T) *Task {
-	fun := func() {
-		f(input)
-	}
-	return New(fun)
-}
-
-// usage
-t := NewWithInput(func(i string) {
-  fmt.Println(i)
-}, "Hello with generics!")
-t.Start()
-t.Wait()
-```
-
-This helper function takes a function that takes a single argument and a value to pass into that function.
-
-To allow a task to return a value we must slightly modify the `Task` struct to store the return value.
-We also create a new constructor function to simplify creation of the new struct and a getter function to get the result after blocking on the execution of the task.
-
-```go
-// Task struct that stores a single result value.
-type TaskWithResult[T any] struct {
-	Task
-	result T
-}
-
-// Creates a new task that stores a single result value.
-func NewWithResult[T any](f func() T) *TaskWithResult[T] {
-	t := &TaskWithResult[T]{
-		Task: *New(nil),
-	}
-	t.f = func() {
-		t.result = f()
-	}
-	return t
-}
-
-// Returns the result value after waiting for the task to finish.
-func (t *TaskWithResult[T]) GetResult() T {
-	t.Wait()
-	return t.result
-}
-```
-
-This new constructor closes over its own container struct in order to store the result value.
-Using these new features are straightforward and shown in the following example.
-`GetResult` is called rather than `Wait` so that we get the result value after the task has finished.
-
-```go
-t := NewWithResult(func() string {
-  return "Hello with generic output!"
-})
-t.Start()
-fmt.Println(t.GetResult())
-```
-
-These approaches can be combined based on the needed input and output tasks of the application.
-Unfortunately we would need to create a new version of these functions and wrapper structs for every variation.
-If we were building a library we would not want to create a new function for every possible number of arguments.
-Code generation and reflection could help solve this but we won't explore that now.
-
 ## Work Queues
 
-Channels in Go are basically queues so a work queue concurrency abstraction makes sense and can be more idiomatic than some of these other patterns.
+Channels in Go are basically queues so a work queue concurrency abstraction makes sense in Go.
 A work queue is a queue of tasks that are executed by a pool of workers.
 The number of workers should be configurable and typically makes sense to set to the number of CPU cores.
 An example work queue implementation is shown below.
@@ -272,7 +123,7 @@ In this example we create a `Workers` struct that has a `Work` channel for tasks
 The struct has a generic type parameter to allow a variety of result types.
 We could allow for input arguments explicitly here but our earlier trick of using closures works here as well since we are using a function as the work item type.
 The struct also stores a wait group to manage synchronization of the workers so that we can close the results channel when all the work is done.
-The constructor for this struct accepts a number of workers to create and starts a go routine for each worker that is listening to work channel to take on work as it comes in.
+The constructor for this struct accepts a number of workers to create and starts a go routine for each worker that is listening to the work channel to take on work as it comes in.
 As work is performed the result is sent to the results channel.
 The following shows how this can be used.
 
@@ -298,10 +149,158 @@ Since the channel will block on send we must send our work items in a separate g
 If we knew ahead of time how much work we would have we could create a buffered channel of the appropriate size.
 {{< /lead >}}
 
+## Tasks
+
+Many languages provide a `Task` concurrency abstraction that allows for asynchronous execution code with explicit synchronization or "awaiting".
+Sometimes this behavior is called a `promise` or `future`.
+It can also be implemented with `async` and `await` keywords.
+
+### Basic Task Implementation
+The following is an implementation of a `Task` abstraction in Go based loosely on the .NET `Task`.
+
+```go
+// task.go
+func New(f func()) *Task {
+	return &Task{
+		f:       f,
+		awaiter: make(chan struct{}),
+	}
+}
+
+func (t *Task) Start() {
+	go func() {
+		t.f()
+		t.awaiter <- struct{}{}
+	}()
+}
+
+func (t *Task) Wait() {
+	<-t.awaiter
+}
+```
+
+To use this `Task` abstraction we can create a new `Task` and call `Start` to start the `Task` in a new `goroutine`.
+We then call `Wait` to wait for the `Task` to complete.
+The awaiter channel is used to block the `Wait` call until the provided function has completed.
+
+```go
+t := New(func() {
+  fmt.Println("Hello, World!")
+})
+t.Start()
+t.Wait()
+```
+
+This implementation is very simple and does not provide any error handling or cancellation.
+It also only implements functions that take no arguments and return no values.
+
+### Task with Input Arguments
+If we want to use a function with arguments with our `Task` we can use a closure to capture the arguments.
+This example uses a similar function except the `greeting` to print is set in the outside scope and passed in as a closure.
+
+```go
+greeting := "Hello from the closure!"
+t := New(func() {
+  fmt.Println(greeting)
+})
+t.Start()
+t.Wait()
+```
+
+{{< lead >}}
+Note that the usual [caveats](https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables) about closures apply here and loop scope variables should be used with care and set as local variables when necessary. In this [proposal](https://github.com/golang/go/issues/20733) this might be changing.
+{{< /lead >}}
+
+### Task with Output Values
+If we want to return a value from the `Task` we can also use a closure to capture the return value.
+This example defines a variable in the outside scope and modifies it in the `Task` function.
+
+```go
+var greeting string
+t := New(func() {
+  greeting = "Hello from the closure!"
+})
+t.Start()
+t.Wait()
+fmt.Println(greeting)
+```
+
+Using closures like this works but it can be hard to determine what the actual inputs and outputs of the `Task` are.
+We also need to pay more attention to the scoping of our variables than seems necessary.
+
+### Refactoring with Generic Helpers
+We can update our `Task` implementation to use some generic helpers to make the code more readable and easier to use.
+Since we have already proven that the closure method works for input and outputs we can take advantage of that and not modify existing code.
+To allow the creation of a task with a single input argument we can create the following helper function.
+
+```go
+// Creates a new task with a single input argument.
+func NewWithInput[T any](f func(T), input T) *Task {
+	fun := func() {
+		f(input)
+	}
+	return New(fun)
+}
+
+// usage
+t := NewWithInput(func(i string) {
+  fmt.Println(i)
+}, "Hello with generics!")
+t.Start()
+t.Wait()
+```
+
+This helper function takes a function that takes a single argument and a value to pass into that function.
+
+To allow a task to return a value we must slightly modify the `Task` struct to store the return value.
+We create a new constructor function to simplify creation of the new struct and a getter function to get the result after blocking on the execution of the task.
+
+```go
+// Task struct that stores a single result value.
+type TaskWithResult[T any] struct {
+	Task
+	result T
+}
+
+// Creates a new task that stores a single result value.
+func NewWithResult[T any](f func() T) *TaskWithResult[T] {
+	t := &TaskWithResult[T]{
+		Task: *New(nil),
+	}
+	t.f = func() {
+		t.result = f()
+	}
+	return t
+}
+
+// Returns the result value after waiting for the task to finish.
+func (t *TaskWithResult[T]) GetResult() T {
+	t.Wait()
+	return t.result
+}
+```
+
+This new constructor closes over its own container struct in order to store the result value.
+Using these new features are straightforward and shown in the following example.
+`GetResult` is called rather than `Wait` so that we get the result value after the task has finished.
+
+```go
+t := NewWithResult(func() string {
+  return "Hello with generic output!"
+})
+t.Start()
+fmt.Println(t.GetResult())
+```
+
+These approaches can be combined based on the needed input and output tasks of the application.
+Unfortunately we would need to create a new version of these functions and wrapper structs for every variation.
+If we were building a library we would not want to create a new function for every possible number of arguments.
+Code generation and reflection could help solve this but we won't explore that now.
+
 ## Actor Model
 
 The actor model is a concurrency abstraction that is based on the idea of actors that communicate with each other via messages.
-An actor can only do three things when receiving a message: mutate internal state, send a message, and create a child actor. [^actor]
+An actor can only do three things when receiving a message: mutate internal state, send a message to another actor, and create new actors. [^actor]
 Message sending is asynchronous and non-blocking by default so the order of messages is not guaranteed.
 The actor is the base unit of computation and they compose to form larger systems.
 One of the interesting properties of an actor model based system is that there is no shared state between actors.
@@ -309,14 +308,14 @@ This allows for greater fault tolerance and easier reasoning about the system.
 
 This pattern has been implemented in many languages and is a proven approach to distributed systems.
 Erlang and other BEAM languages such as Elixir are built around this concept.
-BEAM languages use an abstraction on top of the actor model known as OTP (Open Telecom Platform)[^otp] that creates a framework for building distributed systems.
+BEAM languages use an abstraction on top of the actor model known as OTP (Open Telecom Platform)[^otp] that forms a powerful framework for building distributed systems.
 For a Go implementation of OTP see https://github.com/ergo-services/ergo.
-Our example implementation of the actor model is more basic however.
+This example implementation of the actor model is more basic.
 
 An extra benefit of the actor model is that it can be easily scaled out to a distributed system where the actors are running on different machines though we won't cover that case here.
 
 [^actor]: See https://www.brianstorti.com/the-actor-model/ for a good introduction to the actor model as well as https://en.wikipedia.org/wiki/Actor_model for more history and detail.
-[^otp]: https://github.com/erlang/otp
+[^otp]: See https://github.com/erlang/otp and https://erlang.org/download/armstrong_thesis_2003.pdf for more information on OTP.
 
 ### Actors
 
@@ -392,7 +391,7 @@ The messages will not always be printed in the order they were sent because acto
 ### Specialized Actors
 
 The `Actor` struct we built above is a generic implementation that can be expanded upon to create more specialized actors.
-In this example we create a specialized actor that only prints every message (of type string) it receives.
+In this example we create a specialized actor that prints every message (of type string) it receives.
 
 ```go
 // printer.go
@@ -428,13 +427,13 @@ The output is the same but we get a little bit more reusability and better reada
 ### Multiple Actors
 
 Actors are rarely useful on their own.
-Instead, they typically are composed into larger systems that accomplish more complex tasks.
+Instead, they are typically composed into larger systems that accomplish more complex tasks.
 In this example we create two types of actors: a `ChatRoom` and a `Client`.
 The `ChatRoom` is responsible for printing any message it receives along with the sender's name.
 The `Client` is responsible for sending messages to the `ChatRoom`.
 
 ```go
-// chatroom.go
+// chat_room.go
 type ChatRoom struct {
 	*Actor[message]
 }
@@ -495,14 +494,24 @@ bob.Stop()
 chatRoom.Stop()
 ```
 
-The chatroom actor is constructed, then two clients are created and given the chatroom as inputs so that their handlers know which actor to send messages to.
-The clients then send messages to each other and the chatroom prints them out.
+The `chatroom` actor is constructed, then two clients are created with the `chatroom` pointer as an input so that their handlers know which actor to send messages to.
+The clients then send messages to each other and the `chatroom` prints them out.
 Finally, all actors are stopped and the program exits.
 
 {{< lead >}}
 Note that the actors must be stopped in this example so that we make sure to wait for all messages to be processed since they are passing asynchronously.
 {{< /lead >}}
 
+More advanced actors might accept multiple types of messages and have more complex message handling logic.
+They may also store more complex state.
+Supervisor actors that manage other actors and enhance fault tolerance are also common.
+
 ## Conclusions
 
+
+
 ## Further Reading
+
+[The Go Programming Language](https://www.gopl.io/) by Alan A. A. Donovan and Brian W. Kernighan is a great resource for understanding Go and has thorough descriptions of concurrency in Go.
+
+[Go By Example](https://gobyexample.com/) has useful examples of Go features including those for concurrency.
