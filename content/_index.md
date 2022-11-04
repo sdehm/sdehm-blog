@@ -1,0 +1,1 @@
+Currently learning Go and Rust. Passionate about functional programming, domain driven design, and learning new things.
