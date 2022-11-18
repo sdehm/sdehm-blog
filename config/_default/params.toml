@@ -30,8 +30,9 @@ enableCodeCopy = true
 
 [article]
   showDate = true
-  #showViews = true
-  #showLikes = true
+  showViews = false
+  showLikes = false
+  showComments = true
   showDateUpdated = false
   showAuthor = true
   showBreadcrumbs = true

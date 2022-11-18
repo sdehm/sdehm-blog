@@ -1,2 +1,2 @@
-{{ $js := resources.Get "js/custom.js" | js.Build (dict "minify" true) }}
-<script src="{{ $js.RelPermalink }}"></script>
+{{ $js := resources.Get "js/custom.js" | js.Build (dict "minify" false) }}
+<script defer src="{{ $js.RelPermalink }}"></script>
