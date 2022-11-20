@@ -1,6 +1,8 @@
 import morphdom from "morphdom";
 
-const socket = new WebSocket("ws://localhost:8080/ws");
+const socket = new WebSocket(
+  "ws://localhost:8080/ws?path=" + window.location.pathname
+);
 
 // initialize the connection id
 let connectionId = null;
@@ -24,18 +26,28 @@ socket.onmessage = (event) => {
     case "morph":
       morphdom(document.getElementById(data.id), data.html);
       break;
+    case "prepend":
+      template = document.createElement("template");
+      template.innerHTML = data.html;
+      document.getElementById(data.id).prepend(template.content);
+      break;
   }
 };
 
 function handleCommentSubmit(event) {
   event.preventDefault();
-  console.log("Submitting comment");
   const form = event.target;
   const formData = new FormData(form);
-  const name = formData.get("name");
+  const author = formData.get("name");
   const comment = formData.get("comment");
-  console.log("Name: " + name);
-  console.log("Comment: " + comment);
   // clear the form
   form.reset();
+  // send the comment to the server
+  socket.send(
+    JSON.stringify({
+      type: "comment",
+      author: author,
+      comment: comment,
+    })
+  );
 };
