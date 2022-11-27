@@ -1,0 +1,6 @@
+{
+  "main": "assets/js/custom.js",
+  "dependencies": {
+    "morphdom": "^2.6.1"
+  }
+}

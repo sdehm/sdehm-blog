@@ -1,0 +1,27 @@
+.comments {
+  flex-direction: column;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.comment {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "."
+    "."
+    ".";
+}
+
+.comment-author {
+  font-size: small;
+  line-height: 1rem;
+  padding-top: 0.5rem;
+}
+
+.comment-body {
+  padding-bottom: 0.5rem;
+}
