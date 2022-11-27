@@ -1,38 +1,57 @@
 import morphdom from "morphdom";
 
-const socket = new WebSocket(
-  "ws://localhost:8080/ws?path=" + window.location.pathname
-);
+// const wsBaseUrl = "localhost:8080";
+const wsBaseUrl = "ws.sdehm.dev";
+var socket;
 
-// initialize the connection id
-let connectionId = null;
+function connect() {
+  socket = new WebSocket(
+    "ws://" + wsBaseUrl + "/ws?path=" + window.location.pathname
+  );
 
-socket.onopen = () => {
-  console.log("Connected");
-};
+  // initialize the connection id
+  let connectionId = null;
 
-socket.onmessage = (event) => {
-  const data = JSON.parse(event.data);
+  socket.onopen = () => {
+    console.log("Connected");
+  };
 
-  switch (data.type) {
-    case "connected":
-      connectionId = data.connection_id;
-      console.log("Connection ID: " + connectionId);
-      morphdom(document.getElementById("comments"), data.html);
-      document
-        .getElementById("comment-form")
-        .addEventListener("submit", handleCommentSubmit);
-      break;
-    case "morph":
-      morphdom(document.getElementById(data.id), data.html);
-      break;
-    case "prepend":
-      template = document.createElement("template");
-      template.innerHTML = data.html;
-      document.getElementById(data.id).prepend(template.content);
-      break;
-  }
-};
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    switch (data.type) {
+      case "connected":
+        connectionId = data.connection_id;
+        console.log("Connection ID: " + connectionId);
+        morphdom(document.getElementById("comments"), data.html);
+        document
+          .getElementById("comment-form")
+          .addEventListener("submit", handleCommentSubmit);
+        break;
+      case "morph":
+        morphdom(document.getElementById(data.id), data.html);
+        break;
+      case "prepend":
+        template = document.createElement("template");
+        template.innerHTML = data.html;
+        document.getElementById(data.id).prepend(template.content);
+        break;
+    }
+  };
+
+  socket.onclose = function (e) {
+    console.error("Chat socket closed unexpectedly");
+    // retry
+    setTimeout(() => {
+      connect();
+    }, 1000);
+  };
+
+  socket.onerror = function (err) {
+    console.error(err);
+    socket.close();
+  };
+}
 
 function handleCommentSubmit(event) {
   event.preventDefault();
@@ -50,4 +69,10 @@ function handleCommentSubmit(event) {
       comment: comment,
     })
   );
-};
+}
+
+window.setInterval(function () {
+  socket.send(JSON.stringify({ type: "heartbeat" }));
+}, 5000);
+
+connect();
