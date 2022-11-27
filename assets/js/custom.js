@@ -6,7 +6,7 @@ var socket;
 
 function connect() {
   socket = new WebSocket(
-    "ws://" + wsBaseUrl + "/ws?path=" + window.location.pathname
+    "wss://" + wsBaseUrl + "/ws?path=" + window.location.pathname
   );
 
   // initialize the connection id
