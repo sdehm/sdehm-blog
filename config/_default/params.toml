@@ -30,7 +30,7 @@ enableCodeCopy = true
 
 [article]
   showDate = true
-  showViews = false
+  showViews = true
   showLikes = false
   showComments = true
   showDateUpdated = false
