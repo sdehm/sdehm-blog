@@ -71,8 +71,12 @@ function handleCommentSubmit(event) {
   );
 }
 
-window.setInterval(function () {
-  socket.send(JSON.stringify({ type: "heartbeat" }));
-}, 5000);
+var path = window.location.pathname;
+var isPostPage = path && path.startsWith("/posts/");
+if (isPostPage) {
+  window.setInterval(function () {
+    socket.send(JSON.stringify({ type: "heartbeat" }));
+  }, 5000);
 
-connect();
+  connect();
+}
