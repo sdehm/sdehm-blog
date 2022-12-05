@@ -72,8 +72,9 @@ function handleCommentSubmit(event) {
 }
 
 var path = window.location.pathname;
-var isPostPage = path && path.startsWith("/posts/");
-if (isPostPage) {
+var shouldConnect =
+  path && (path.startsWith("/posts/") || path === "/" || path === "/posts/");
+if (shouldConnect) {
   window.setInterval(function () {
     socket.send(JSON.stringify({ type: "heartbeat" }));
   }, 5000);
