@@ -2,6 +2,7 @@
 title: "Making a Static Blog Dynamic: Websockets and Morphdom with a Go Server"
 date: 2022-12-14
 draft: false
+tags: ["go", "websockets", "morphdom", "hugo", "fly.io", "cockroachdb"]
 ---
 
 ## Inspiration and Introduction
