@@ -1,7 +1,7 @@
 ---
 title: "Making a Static Blog Dynamic: Websockets and Morphdom with a Go Server"
 date: 2022-12-14
-draft: true
+draft: false
 ---
 
 ## Inspiration and Introduction
