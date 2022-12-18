@@ -45,6 +45,7 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v2
+        
       - name: Build with Hugo
         env:
           # For maximum backward compatibility with Hugo modules
@@ -52,8 +53,7 @@ jobs:
           HUGO_ENV: production
         run: |
           hugo \
-            --minify \
-            --baseURL "${{ steps.pages.outputs.base_url }}/"
+            --minify
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
