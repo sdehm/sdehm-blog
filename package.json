@@ -1,6 +1,8 @@
 {
+  "name": "sdehm-blog",
+  "private": true,
   "main": "assets/js/custom.js",
   "dependencies": {
-    "morphdom": "^2.6.1"
+    "morphdom": "^2.7.8"
   }
 }

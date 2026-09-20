@@ -6,13 +6,15 @@ baseURL = "https://sdehm.dev/"
 defaultContentLanguage = "en"
 
 enableRobotsTXT = true
-paginate = 20
 summaryLength = 30
 
 buildDrafts = false
 buildFuture = false
 
 # googleAnalytics = "G-XXXXXXXXX"
+
+[pagination]
+  pagerSize = 20
 
 [sitemap]
   changefreq = 'daily'

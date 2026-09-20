@@ -35,6 +35,8 @@ hugo.linux
 go.work
 .DS_Store
 
+# Local browser verification artifacts
+.playwright-mcp/
 
 # Logs
 logs
