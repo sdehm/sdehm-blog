@@ -1,5 +1,5 @@
-languageCode = "en"
-languageName = "English"
+locale = "en"
+label = "English"
 displayName = "EN"
 isoCode = "en"
 weight = 1
