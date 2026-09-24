@@ -19,7 +19,7 @@
     {{ $posts := where .Site.RegularPages "Type" "posts" }}
     <ul class="post-list">
       {{ range first 5 $posts }}
-        {{ partial "article-card.html" (dict "page" . "headingLevel" 3) }}
+        {{ partial "article-card.html" (dict "page" . "headingLevel" 3 "showViews" true) }}
       {{ end }}
     </ul>
     {{ if gt (len $posts) 5 }}

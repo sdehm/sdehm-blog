@@ -22,12 +22,15 @@ function connect() {
       case "connected":
         connectionId = data.connection_id;
         console.log("Connection ID: " + connectionId);
-        morphdom(document.getElementById("comments"), data.html);
-        const form = document.getElementById("comment-form");
-        if (form) {
-          form.onsubmit = handleCommentSubmit;
-        } else {
-          console.error("Comment form missing from WebSocket response");
+        const comments = document.getElementById("comments");
+        if (comments) {
+          morphdom(comments, data.html);
+          const form = document.getElementById("comment-form");
+          if (form) {
+            form.onsubmit = handleCommentSubmit;
+          } else {
+            console.error("Comment form missing from WebSocket response");
+          }
         }
         break;
       case "morph":
@@ -91,7 +94,7 @@ function handleCommentSubmit(event) {
   );
 }
 
-if (document.getElementById("comments")) {
+if (document.getElementById("comments") || document.querySelector('[id^="views_"]')) {
   window.setInterval(function () {
     if (socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ type: "heartbeat" }));
