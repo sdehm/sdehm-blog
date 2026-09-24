@@ -1,1 +1,1 @@
-Currently learning Go and Rust. Passionate about functional programming, domain driven design, and learning new things.
+Always learning and exploring new ways to build software and make it useful. Current topics include making the most of new AI and traditional ML models to help both developers and enterprise without losing the craftsmanship and critical reasoning side of creating software.

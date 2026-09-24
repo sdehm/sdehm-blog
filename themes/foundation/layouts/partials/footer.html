@@ -1,0 +1,12 @@
+<footer class="site-footer">
+  <div class="container container--wide site-footer__inner">
+    <p>&copy; {{ now.Year }} {{ .Site.Params.author.name | default .Site.Title }}</p>
+    <ul class="site-footer__links">
+      {{ range .Site.Menus.footer }}
+        <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+      {{ end }}
+      <li><a href="{{ .Site.Home.RelPermalink }}index.xml">RSS</a></li>
+    </ul>
+  </div>
+  {{ partial "extend-footer.html" . }}
+</footer>

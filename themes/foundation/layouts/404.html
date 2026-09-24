@@ -1,0 +1,10 @@
+{{ define "main" }}
+  <div class="container error-page">
+    <p class="error-page__code">404</p>
+    <h1>Lost in the woods</h1>
+    <p>That page wandered off. Let's get you back on the path.</p>
+    <div>
+      <a class="button" href="{{ .Site.Home.Permalink }}">Back to home</a>
+    </div>
+  </div>
+{{ end }}

@@ -1,0 +1,12 @@
+name = "Foundation"
+license = "MIT"
+licenselink = "https://github.com/sdehm/sdehm-blog/blob/main/LICENSE"
+description = "A modern, warm, customizable Hugo theme built on CSS custom properties."
+homepage = "https://sdehm.dev/"
+tags = ["blog", "minimal", "modern", "customizable"]
+features = ["dark mode", "css custom properties", "responsive", "seo"]
+min_version = "0.146.0"
+
+[author]
+  name = "Shaffer Dehmlow"
+  homepage = "https://sdehm.dev/"
