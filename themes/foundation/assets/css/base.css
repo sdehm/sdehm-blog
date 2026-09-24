@@ -1,0 +1,209 @@
+/*
+  Base reset + element defaults.
+  Modern reset (box-sizing, margin removal) followed by sensible
+  typographic and interactive defaults built from tokens.css.
+*/
+
+/* Monaspace Neon: GitHub's monospace superfamily, self-hosted for the
+   ligature/texture-healing features (=>, ->, !=, etc.) via "calt" below. */
+@font-face {
+  font-family: "Monaspace Neon";
+  src: url("/fonts/monaspace/MonaspaceNeonVar.woff2") format("woff2-variations"), url("/fonts/monaspace/MonaspaceNeonVar.woff2") format("woff2");
+  font-weight: 200 800;
+  font-stretch: 100%;
+  font-style: normal;
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100svh;
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: var(--leading-normal);
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--color-amber) 10%, transparent) 0, transparent 42%),
+    radial-gradient(circle at 88% 92%, color-mix(in srgb, var(--color-olive) 8%, transparent) 0, transparent 45%);
+  background-attachment: fixed;
+  transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+a {
+  color: var(--color-link);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+::selection {
+  background-color: var(--color-selection);
+  color: var(--color-ink);
+}
+
+/* Visible, on-brand focus ring for keyboard users everywhere */
+:focus-visible {
+  outline: 2.5px solid var(--color-focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Headings & display type ---- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: var(--step-5);
+}
+h2 {
+  font-size: var(--step-4);
+}
+h3 {
+  font-size: var(--step-3);
+}
+h4 {
+  font-size: var(--step-2);
+}
+h5,
+h6 {
+  font-size: var(--step-1);
+}
+
+p,
+li,
+figcaption {
+  text-wrap: pretty;
+}
+
+small {
+  font-size: var(--step--1);
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-variant-ligatures: contextual;
+  /* Monaspace's calt feature powers its code ligatures (=>, ->, !=, etc.) */
+  font-feature-settings: "calt" 1;
+}
+
+code {
+  background-color: var(--color-code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+pre {
+  background-color: var(--color-code-bg);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  line-height: var(--leading-snug);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+hr {
+  border: none;
+  border-top: var(--border-width) solid var(--color-border);
+  margin-block: var(--space-lg);
+}
+
+blockquote {
+  border-left: 3px solid var(--color-terracotta);
+  padding-left: var(--space-sm);
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: var(--border-width) solid var(--color-border);
+  padding: var(--space-2xs) var(--space-xs);
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

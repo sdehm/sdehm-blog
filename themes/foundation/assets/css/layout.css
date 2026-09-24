@@ -1,0 +1,228 @@
+/*
+  Page-level layout primitives: skip link, containers, header, footer,
+  and the article grid. Component-level styling lives in components.css.
+*/
+
+.skip-link {
+  position: absolute;
+  left: var(--space-sm);
+  top: -3rem;
+  z-index: 100;
+  background-color: var(--color-terracotta);
+  color: #fff;
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: top var(--duration-fast) var(--ease-out);
+}
+
+.skip-link:focus {
+  top: var(--space-sm);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.container--wide {
+  max-width: var(--wide-width);
+}
+
+.site {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.site-main {
+  flex: 1;
+  padding-block: var(--space-xl) var(--space-3xl);
+}
+
+/* ---- Header ---- */
+.site-header {
+  padding-block: var(--space-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-weight: 700;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.site-brand:hover {
+  color: var(--color-terracotta);
+}
+
+.site-brand__mark {
+  width: 1.2em;
+  height: 1.4em;
+  flex: none;
+  color: var(--color-terracotta);
+}
+
+.home .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--color-paper);
+}
+
+.home .site-brand__name {
+  display: none;
+}
+
+@media (min-width: 48rem) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll(root block)) {
+    .home .site-brand__name {
+      display: inline-block;
+      animation: reveal-brand 1s linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 6.5rem 8.5rem;
+    }
+  }
+}
+
+@keyframes reveal-brand {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.site-nav__list {
+  display: flex;
+  list-style: none;
+  gap: var(--space-sm);
+  padding: 0;
+}
+
+.site-nav__link {
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  text-decoration: none;
+  padding-block: var(--space-3xs);
+  position: relative;
+}
+
+.site-nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -2px;
+  height: 2px;
+  background-color: var(--color-terracotta);
+  transition: right var(--duration-base) var(--ease-out);
+}
+
+.site-nav__link:hover {
+  color: var(--color-ink);
+}
+
+.site-nav__link:hover::after,
+.site-nav__link[aria-current="page"]::after {
+  right: 0;
+}
+
+.site-nav__link[aria-current="page"] {
+  color: var(--color-ink);
+}
+
+/* ---- Footer ---- */
+.site-footer {
+  border-top: var(--border-width) solid var(--color-border);
+  padding-block: var(--space-lg);
+}
+
+.site-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  color: var(--color-ink-soft);
+  font-size: var(--step--1);
+}
+
+.site-footer__links {
+  display: flex;
+  gap: var(--space-sm);
+  list-style: none;
+  padding: 0;
+}
+
+/* ---- Article list / grid ---- */
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  list-style: none;
+  padding: 0;
+}
+
+/* ---- Prose (article body) ---- */
+.prose > * + * {
+  margin-top: var(--space-sm);
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-2xs);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: var(--space-md);
+}
+
+.prose img {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.prose .lead {
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-ink-soft);
+  border-left: 2px solid var(--color-border);
+  padding-left: var(--space-sm);
+}
+
+@media (max-width: 40rem) {
+  .site-nav__list {
+    gap: var(--space-xs);
+  }
+}

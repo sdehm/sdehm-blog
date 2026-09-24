@@ -1,0 +1,147 @@
+/*
+  Syntax highlighting (Chroma classes, noClasses = false in markup.toml)
+  mapped onto our design tokens: terracotta for keywords, amber for
+  functions, olive for strings, teal for types/builtins, muted ink for
+  comments/punctuation. Works in both light and dark via the same
+  custom properties as the rest of the theme.
+*/
+
+.chroma {
+  color: var(--color-ink);
+}
+
+/* Comments */
+.chroma .c,
+.chroma .c1,
+.chroma .cm,
+.chroma .cs {
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+.chroma .cp,
+.chroma .cpf {
+  color: var(--color-teal-strong);
+  font-style: italic;
+}
+
+/* Keywords */
+.chroma .k,
+.chroma .kd,
+.chroma .kn,
+.chroma .kr,
+.chroma .kc {
+  color: var(--color-terracotta-strong);
+  font-weight: 600;
+}
+.chroma .kt {
+  color: var(--color-teal-strong);
+  font-weight: 600;
+}
+.chroma .ow {
+  color: var(--color-terracotta-strong);
+}
+
+/* Names */
+.chroma .n {
+  color: var(--color-ink);
+}
+.chroma .nf,
+.chroma .fm {
+  color: var(--color-amber-strong);
+  font-weight: 600;
+}
+.chroma .nb,
+.chroma .bp {
+  color: var(--color-teal-strong);
+}
+.chroma .nc,
+.chroma .nn {
+  color: var(--color-teal-strong);
+  font-weight: 600;
+}
+.chroma .nd {
+  color: var(--color-amber-strong);
+}
+.chroma .nt {
+  color: var(--color-terracotta-strong);
+  font-weight: 600;
+}
+.chroma .na {
+  color: var(--color-olive-strong);
+}
+.chroma .nv,
+.chroma .vc,
+.chroma .vg,
+.chroma .vi {
+  color: var(--color-ink);
+}
+.chroma .ni {
+  color: var(--color-amber-strong);
+}
+
+/* Strings */
+.chroma .s,
+.chroma .s1,
+.chroma .s2,
+.chroma .sc,
+.chroma .sh,
+.chroma .sx,
+.chroma .dl {
+  color: var(--color-olive-strong);
+}
+.chroma .sa,
+.chroma .se,
+.chroma .si {
+  color: var(--color-teal-strong);
+}
+.chroma .sr {
+  color: var(--color-teal-strong);
+}
+
+/* Numbers & constants */
+.chroma .m,
+.chroma .mf,
+.chroma .mh,
+.chroma .mi,
+.chroma .mo,
+.chroma .il {
+  color: var(--color-terracotta-strong);
+}
+
+/* Operators & punctuation */
+.chroma .o {
+  color: var(--color-terracotta-strong);
+}
+.chroma .p {
+  color: var(--color-ink-soft);
+}
+
+/* Diffs */
+.chroma .gd {
+  color: var(--color-terracotta-strong);
+  background-color: color-mix(in srgb, var(--color-terracotta) 12%, transparent);
+}
+.chroma .gi {
+  color: var(--color-olive-strong);
+  background-color: color-mix(in srgb, var(--color-olive) 14%, transparent);
+}
+.chroma .gh {
+  color: var(--color-ink-soft);
+  font-weight: 600;
+}
+
+/* Errors */
+.chroma .err {
+  color: var(--color-terracotta-strong);
+  text-decoration: wavy underline;
+}
+
+/* Line highlighting / numbers, in case lineNos is ever enabled */
+.chroma .hl {
+  background-color: color-mix(in srgb, var(--color-amber) 14%, transparent);
+}
+.chroma .lnt,
+.chroma .ln {
+  color: var(--color-ink-soft);
+  opacity: 0.6;
+}

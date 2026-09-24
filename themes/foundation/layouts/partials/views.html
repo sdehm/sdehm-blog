@@ -1,0 +1,17 @@
+{{/*
+  View counter mount point. This does not fetch or compute a count itself —
+  it exposes the legacy id convention
+  (views_<file-path>), which the site's custom WebSocket backend (see
+  assets/js/custom.js) targets with a "morph" message to fill in the count.
+  Guarded by site.Params.article.showViews.
+*/}}
+{{ with .File }}
+  {{ $id := printf "views_%s" .Path }}
+  <span class="article-meta__item" title="views">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+      <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+    <span id="{{ $id }}">–</span>
+  </span>
+{{ end }}

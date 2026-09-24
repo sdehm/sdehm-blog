@@ -1,6 +1,5 @@
 import morphdom from "morphdom";
 
-// const wsBaseUrl = "localhost:8080";
 const wsBaseUrl = "ws.sdehm.dev";
 var socket;
 
@@ -13,7 +12,7 @@ function connect() {
   let connectionId = null;
 
   socket.onopen = () => {
-    console.log("Connected");
+    console.log("Connected to comments");
   };
 
   socket.onmessage = (event) => {
@@ -23,18 +22,38 @@ function connect() {
       case "connected":
         connectionId = data.connection_id;
         console.log("Connection ID: " + connectionId);
-        morphdom(document.getElementById("comments"), data.html);
-        document
-          .getElementById("comment-form")
-          .addEventListener("submit", handleCommentSubmit);
+        const comments = document.getElementById("comments");
+        if (comments) {
+          morphdom(comments, data.html);
+          const form = document.getElementById("comment-form");
+          if (form) {
+            form.onsubmit = handleCommentSubmit;
+          } else {
+            console.error("Comment form missing from WebSocket response");
+          }
+        }
         break;
       case "morph":
-        morphdom(document.getElementById(data.id), data.html);
+        {
+          const target = document.getElementById(data.id);
+          if (target) {
+            morphdom(target, data.html);
+          } else {
+            console.error("WebSocket update target not found:", data.id);
+          }
+        }
         break;
       case "prepend":
-        template = document.createElement("template");
-        template.innerHTML = data.html;
-        document.getElementById(data.id).prepend(template.content);
+        {
+          const target = document.getElementById(data.id);
+          if (target) {
+            const template = document.createElement("template");
+            template.innerHTML = data.html;
+            target.prepend(template.content);
+          } else {
+            console.error("WebSocket prepend target not found:", data.id);
+          }
+        }
         break;
     }
   };
@@ -59,6 +78,10 @@ function handleCommentSubmit(event) {
   const formData = new FormData(form);
   const author = formData.get("name");
   const comment = formData.get("comment");
+  if (socket.readyState !== WebSocket.OPEN) {
+    console.error("Comment not sent: WebSocket is disconnected");
+    return;
+  }
   // clear the form
   form.reset();
   // send the comment to the server
@@ -71,12 +94,11 @@ function handleCommentSubmit(event) {
   );
 }
 
-var path = window.location.pathname;
-var shouldConnect =
-  path && (path.startsWith("/posts/") || path === "/" || path === "/posts/");
-if (shouldConnect) {
+if (document.getElementById("comments") || document.querySelector('[id^="views_"]')) {
   window.setInterval(function () {
-    socket.send(JSON.stringify({ type: "heartbeat" }));
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "heartbeat" }));
+    }
   }, 5000);
 
   connect();

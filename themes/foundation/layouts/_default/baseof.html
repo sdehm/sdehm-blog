@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ .Site.Language.LanguageCode | default "en" }}" data-theme="">
+  <head>
+    {{ partial "head.html" . }}
+  </head>
+  <body{{ if .IsHome }} class="home"{{ end }}>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="site">
+      {{ partial "header.html" . }}
+      <main id="main-content" class="site-main">
+        {{ block "main" . }}{{ end }}
+      </main>
+      {{ partial "footer.html" . }}
+    </div>
+    {{ with resources.Get "js/theme-toggle.js" }}
+      {{ $js := . | js.Build (dict "minify" (not hugo.IsDevelopment)) }}
+      <script src="{{ $js.RelPermalink }}" defer></script>
+    {{ end }}
+    {{ with resources.Get "js/code-copy.js" }}
+      {{ $js := . | js.Build (dict "minify" (not hugo.IsDevelopment)) }}
+      <script src="{{ $js.RelPermalink }}" defer></script>
+    {{ end }}
+  </body>
+</html>

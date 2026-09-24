@@ -1,0 +1,29 @@
+{{ define "main" }}
+  <div class="container">
+    <section class="hero">
+      <h1 class="hero__title">{{ .Site.Params.author.name | default .Site.Title }}</h1>
+      {{ with .Content }}
+        <div class="hero__lede">{{ . }}</div>
+      {{ end }}
+      <div class="hero__actions">
+        {{ with .Site.Params.author.github }}
+          <a class="button button--ghost" href="{{ . }}">GitHub</a>
+        {{ end }}
+        {{ with .Site.Params.author.linkedin }}
+          <a class="button button--ghost" href="{{ . }}">LinkedIn</a>
+        {{ end }}
+      </div>
+    </section>
+
+    <h2 id="recent-posts">Recent posts</h2>
+    {{ $posts := where .Site.RegularPages "Type" "posts" }}
+    <ul class="post-list">
+      {{ range first 5 $posts }}
+        {{ partial "article-card.html" (dict "page" . "headingLevel" 3 "showViews" true) }}
+      {{ end }}
+    </ul>
+    {{ if gt (len $posts) 5 }}
+      <p class="post-archive-link"><a href="{{ "/posts" | relLangURL }}">All posts →</a></p>
+    {{ end }}
+  </div>
+{{ end }}

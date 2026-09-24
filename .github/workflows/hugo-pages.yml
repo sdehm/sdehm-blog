@@ -30,20 +30,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GO_VERSION: 1.27.1
       HUGO_VERSION: 0.165.0
       NODE_VERSION: 24.21.0
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
-        with:
-          submodules: recursive
-
-      - name: Setup Go
-        uses: actions/setup-go@v7.0.0
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v7.0.0
@@ -67,7 +58,6 @@ jobs:
 
       - name: Build with Hugo
         env:
-          # For maximum backward compatibility with Hugo modules
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: hugo --gc --minify

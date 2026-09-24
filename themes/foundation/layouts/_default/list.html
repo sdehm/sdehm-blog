@@ -1,0 +1,18 @@
+{{ define "main" }}
+  <div class="container">
+    <header>
+      <h1>{{ .Title }}</h1>
+      {{ with .Content }}
+        <div class="prose">{{ . }}</div>
+      {{ end }}
+    </header>
+
+    <ul class="post-list">
+      {{ range .Paginator.Pages }}
+        {{ partial "article-card.html" (dict "page" . "headingLevel" 2 "showViews" (and (eq $.Kind "section") (eq $.Section "posts"))) }}
+      {{ end }}
+    </ul>
+
+    {{ template "_internal/pagination.html" . }}
+  </div>
+{{ end }}

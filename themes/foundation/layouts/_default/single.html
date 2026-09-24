@@ -1,0 +1,50 @@
+{{ define "main" }}
+  <article class="container">
+    <header>
+      <h1>{{ .Title }}</h1>
+      <div class="article-meta">
+        {{ if .Date }}
+          <span class="article-meta__item">
+            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (.Site.Params.dateFormat | default "2 January 2006") }}</time>
+          </span>
+        {{ end }}
+        <span class="article-meta__item">{{ .ReadingTime }} min read</span>
+        {{ if .Site.Params.article.showViews }}
+          {{ partial "views.html" . }}
+        {{ end }}
+        {{ with .Params.tags }}
+          <span class="article-meta__item">
+            <ul class="tag-list">
+              {{ range . }}
+                <li><a class="tag" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">#{{ . }}</a></li>
+              {{ end }}
+            </ul>
+          </span>
+        {{ end }}
+      </div>
+    </header>
+
+    {{ if and .Site.Params.showTableOfContents .TableOfContents }}
+      <details class="toc" open>
+        <summary>Contents</summary>
+        <nav>{{ .TableOfContents }}</nav>
+      </details>
+    {{ end }}
+
+    <div class="prose">
+      {{ .Content }}
+    </div>
+
+    <nav class="pagination">
+      {{ with .PrevInSection }}
+        <a class="pagination__link" href="{{ .RelPermalink }}">← {{ .Title }}</a>
+      {{ end }}
+      <span class="pagination__spacer"></span>
+      {{ with .NextInSection }}
+        <a class="pagination__link" href="{{ .RelPermalink }}">{{ .Title }} →</a>
+      {{ end }}
+    </nav>
+
+    {{ partial "comments.html" . }}
+  </article>
+{{ end }}

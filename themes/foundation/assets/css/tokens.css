@@ -1,0 +1,170 @@
+/*
+  Design tokens
+  -------------
+  Every visual decision in this theme flows from the custom properties
+  defined here. Retheming the site should mostly mean editing this file.
+
+  Light values live on :root. Dark values live in the prefers-color-scheme
+  media query AND under [data-theme="dark"] so a manual toggle (see
+  js/theme-toggle.js) can override the system preference. [data-theme="light"]
+  lets the toggle force light mode even in a dark system.
+*/
+
+:root {
+  color-scheme: light;
+
+  /* ---- Palette: warm neutrals + terracotta/amber/olive accents ---- */
+  --color-paper: #fbf6ef;
+  --color-paper-raised: #ffffff;
+  --color-ink: #2a211a;
+  --color-ink-soft: #5a4d42;
+  --color-border: #e4d9c8;
+
+  --color-terracotta: #c1552c;
+  --color-terracotta-strong: #a3431f;
+  --color-amber: #e0982c;
+  --color-amber-strong: #875012;
+  --color-amber-soft: #f6e3bd;
+  --color-olive: #6b7a4f;
+  --color-olive-strong: #556140;
+  --color-teal: #2f6f68;
+  --color-teal-strong: #1f544f;
+
+  --color-link: var(--color-terracotta-strong);
+  --color-link-hover: var(--color-terracotta);
+  --color-focus-ring: var(--color-amber);
+  --color-code-bg: #f1e7d8;
+  --color-selection: var(--color-amber-soft);
+
+  /* ---- Type ---- */
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Monaspace Neon", "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+
+  /* Fluid type scale (clamp: min, preferred-vw, max) */
+  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.13rem + 0.35vw, 1.375rem);
+  --step-2: clamp(1.44rem, 1.32rem + 0.6vw, 1.75rem);
+  --step-3: clamp(1.73rem, 1.54rem + 0.95vw, 2.25rem);
+  --step-4: clamp(2.07rem, 1.8rem + 1.35vw, 2.9rem);
+  --step-5: clamp(2.49rem, 2.08rem + 2.05vw, 3.75rem);
+
+  /* ---- Space (fluid, 4px base) ---- */
+  --space-3xs: clamp(0.25rem, 0.23rem + 0.1vw, 0.3rem);
+  --space-2xs: clamp(0.5rem, 0.46rem + 0.2vw, 0.6rem);
+  --space-xs: clamp(0.75rem, 0.69rem + 0.3vw, 0.9rem);
+  --space-sm: clamp(1rem, 0.92rem + 0.4vw, 1.2rem);
+  --space-md: clamp(1.5rem, 1.38rem + 0.6vw, 1.8rem);
+  --space-lg: clamp(2rem, 1.8rem + 1vw, 2.6rem);
+  --space-xl: clamp(3rem, 2.7rem + 1.5vw, 3.9rem);
+  --space-2xl: clamp(4rem, 3.5rem + 2.5vw, 5.5rem);
+  --space-3xl: clamp(5.5rem, 4.7rem + 4vw, 8rem);
+
+  /* ---- Shape & depth ---- */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --border-width: 1.5px;
+
+  --shadow-sm: 0 1px 2px rgba(42, 33, 26, 0.08);
+  --shadow-md: 0 6px 20px -6px rgba(42, 33, 26, 0.18);
+  --shadow-lg: 0 16px 40px -12px rgba(42, 33, 26, 0.28);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+
+  /* ---- Layout ---- */
+  --content-width: 42rem;
+  --wide-width: 64rem;
+  --gutter: var(--space-md);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-paper: #201a15;
+    --color-paper-raised: #2a2219;
+    --color-ink: #f3e9dc;
+    --color-ink-soft: #cbb9a4;
+    --color-border: #3d3226;
+
+    --color-terracotta: #e2794a;
+    --color-terracotta-strong: #f0946a;
+    --color-amber: #f0b153;
+    --color-amber-strong: #f0b153;
+    --color-amber-soft: #4a3c22;
+    --color-olive: #a3b57e;
+    --color-olive-strong: #b9c996;
+    --color-teal: #6fbdb4;
+    --color-teal-strong: #93d3ca;
+
+    --color-link: var(--color-terracotta-strong);
+    --color-link-hover: var(--color-amber);
+    --color-code-bg: #2d251c;
+    --color-selection: #4a3c22;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Manual override via the theme toggle takes precedence over system preference */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: #201a15;
+  --color-paper-raised: #2a2219;
+  --color-ink: #f3e9dc;
+  --color-ink-soft: #cbb9a4;
+  --color-border: #3d3226;
+  --color-terracotta: #e2794a;
+  --color-terracotta-strong: #f0946a;
+  --color-amber: #f0b153;
+  --color-amber-strong: #f0b153;
+  --color-amber-soft: #4a3c22;
+  --color-olive: #a3b57e;
+  --color-olive-strong: #b9c996;
+  --color-teal: #6fbdb4;
+  --color-teal-strong: #93d3ca;
+  --color-link: var(--color-terracotta-strong);
+  --color-link-hover: var(--color-amber);
+  --color-code-bg: #2d251c;
+  --color-selection: #4a3c22;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-paper: #fbf6ef;
+  --color-paper-raised: #ffffff;
+  --color-ink: #2a211a;
+  --color-ink-soft: #5a4d42;
+  --color-border: #e4d9c8;
+  --color-terracotta: #c1552c;
+  --color-terracotta-strong: #a3431f;
+  --color-amber: #e0982c;
+  --color-amber-strong: #875012;
+  --color-amber-soft: #f6e3bd;
+  --color-olive: #6b7a4f;
+  --color-olive-strong: #556140;
+  --color-teal: #2f6f68;
+  --color-teal-strong: #1f544f;
+  --color-link: var(--color-terracotta-strong);
+  --color-link-hover: var(--color-terracotta);
+  --color-code-bg: #f1e7d8;
+  --color-selection: #f6e3bd;
+  --shadow-sm: 0 1px 2px rgba(42, 33, 26, 0.08);
+  --shadow-md: 0 6px 20px -6px rgba(42, 33, 26, 0.18);
+  --shadow-lg: 0 16px 40px -12px rgba(42, 33, 26, 0.28);
+}

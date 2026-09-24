@@ -1,0 +1,22 @@
+<li class="article-card">
+  <div class="article-card__meta">
+    {{ if eq .page.Kind "term" }}
+      <span>{{ len .page.Pages }} {{ if eq (len .page.Pages) 1 }}post{{ else }}posts{{ end }}</span>
+    {{ else if .page.Date }}
+      <time datetime="{{ .page.Date.Format "2006-01-02" }}">{{ .page.Date.Format (.page.Site.Params.dateFormat | default "2 January 2006") }}</time>
+    {{ end }}
+    {{ if and .showViews .page.Site.Params.article.showViews }}
+      {{ partial "views.html" .page }}
+    {{ end }}
+    {{ if ne .page.Kind "term" }}
+      {{ with .page.Params.tags }}
+        <span aria-hidden="true">·</span>
+        <span>{{ delimit . ", " }}</span>
+      {{ end }}
+    {{ end }}
+  </div>
+  <h{{ .headingLevel }} class="article-card__title"><a href="{{ .page.RelPermalink }}">{{ .page.Title }}</a></h{{ .headingLevel }}>
+  {{ with .page.Summary }}
+    <p class="article-card__summary">{{ . | plainify | truncate 160 }}</p>
+  {{ end }}
+</li>
